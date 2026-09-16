@@ -27,14 +27,19 @@ menu.querySelectorAll('a').forEach((link) => link.addEventListener('click', clos
 window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 24), { passive: true });
 
 const terms = document.querySelectorAll('[data-definition]');
-function showDefinition(name, scroll = false) {
-  terms.forEach((button) => button.classList.toggle('active', button.dataset.definition === name));
-  document.querySelectorAll('[data-definition-panel]').forEach((panel) => panel.classList.toggle('active', panel.dataset.definitionPanel === name));
-  if (scroll) document.querySelector(`[data-definition="${name}"]`).scrollIntoView({ behavior: 'smooth', block: 'center' });
+function setDefinition(name, open, scroll = false) {
+  const button = document.querySelector(`[data-definition="${name}"]`);
+  const panel = document.querySelector(`[data-definition-panel="${name}"]`);
+  if (!button || !panel) return;
+  button.classList.toggle('active', open);
+  button.setAttribute('aria-expanded', String(open));
+  panel.classList.toggle('active', open);
+  panel.hidden = !open;
+  if (scroll) button.scrollIntoView({ behavior: 'smooth', block: 'center' });
 }
 
-terms.forEach((button) => button.addEventListener('click', () => showDefinition(button.dataset.definition)));
-document.querySelectorAll('[data-term]').forEach((button) => button.addEventListener('click', () => showDefinition(button.dataset.term, true)));
+terms.forEach((button) => button.addEventListener('click', () => setDefinition(button.dataset.definition, button.getAttribute('aria-expanded') !== 'true')));
+document.querySelectorAll('[data-term]').forEach((button) => button.addEventListener('click', () => setDefinition(button.dataset.term, true, true)));
 
 const observer = new IntersectionObserver((entries) => {
   entries.forEach((entry) => {
